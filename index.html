@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> تسجيل الدخول</title>
+  <link rel="icon" href="favicon phantom wear.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* === (احتفظت بكل CSS كما كان في نسختك الأصلية) === */
+    :root {
+      --primary-color: #C63A39;
+      --secondary-color: #C63A39;
+      --error-color: #f72585;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display:flex; justify-content:center; align-items:center;
+      min-height:100vh; padding:20px;
+    }
+    .login-container {
+      background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.1);
+      width:100%; max-width:420px; overflow:hidden;
+    }
+    .login-header {
+      background:linear-gradient(to right,var(--primary-color),var(--secondary-color));
+      color:#fff; padding:30px 20px; text-align:center;
+    }
+    .login-header h1 { font-size:1.8rem; margin-bottom:10px; }
+    .login-body { padding:30px; position:relative; }
+    .logo {
+      width:80px; height:80px; background:#fff; border-radius:50%;
+      display:flex; justify-content:center; align-items:center;
+      margin:-60px auto 20px; box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    }
+    .logo i { font-size:2.5rem; color:var(--primary-color); }
+    .input-group { margin-bottom:20px; }
+    .input-group label { display:block; margin-bottom:8px; font-weight:500; color:var(--dark-color); }
+    .pin-container { display:flex; justify-content:space-between; direction:ltr; }
+    .pin-input {
+      width:60px; height:60px; text-align:center; font-size:1.5rem;
+      border:2px solid #e9ecef; border-radius:8px; transition:all 0.3s;
+    }
+    .pin-input:focus {
+      border-color:var(--primary-color); outline:none;
+      box-shadow:0 0 0 3px rgba(67,97,238,0.2);
+    }
+    .login-btn {
+      width:100%; padding:15px;
+      background:linear-gradient(to right,var(--primary-color),var(--secondary-color));
+      color:#fff; border:none; border-radius:8px;
+      font-size:1rem; font-weight:600; cursor:pointer; transition:all 0.3s; margin-top:10px;
+    }
+    .login-btn:hover { opacity:0.9; transform:translateY(-2px); }
+    .error-msg {
+      color:var(--error-color); text-align:center; margin-top:15px;
+      font-size:0.9rem; display:none;
+    }
+    .attempts-counter {
+      text-align:center; margin-top:15px; font-size:0.9rem; color:#6c757d;
+    }
+    .footer { text-align:center; margin-top:30px; font-size:0.8rem; color:#6c757d; }
+    @media (max-width:480px) {
+      .pin-input { width:50px; height:50px; font-size:1.2rem; }
+      .login-body { padding:20px; }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-5px); }
+      40%,80% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>مرحباً بك</h1>
+      <p>أدخل الرمز للمتابعة</p>
+    </div>
+    <div class="logo"><i class="fas fa-lock"></i></div>
+    <div class="login-body">
+      <div class="input-group">
+        <label>أدخل رمز PIN المكون من 4 أرقام</label>
+        <div class="pin-container" id="pinContainer">
+          <input type="password" class="pin-input" maxlength="1" data-index="1" inputmode="numeric" pattern="[0-9]*">
+          <input type="password" class="pin-input" maxlength="1" data-index="2" inputmode="numeric" pattern="[0-9]*">
+          <input type="password" class="pin-input" maxlength="1" data-index="3" inputmode="numeric" pattern="[0-9]*">
+          <input type="password" class="pin-input" maxlength="1" data-index="4" inputmode="numeric" pattern="[0-9]*">
+        </div>
+      </div>
+      <button class="login-btn" id="loginBtn">
+        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+      </button>
+      <div class="error-msg" id="errorMsg">
+        <i class="fas fa-exclamation-circle"></i> رمز PIN غير صحيح
+      </div>
+      <div class="attempts-counter">
+        المحاولات المتبقية: <span id="attemptsLeft">3</span>
+      </div>
+      <div class="footer"><p>النظام الآلي©</p></div>
+    </div>
+  </div>
+
+  <script>
+    const CORRECT_PIN    = "9763";
+    let   attemptsLeft   = 3;
+    const pinInputs      = document.querySelectorAll('.pin-input');
+    const loginBtn       = document.getElementById('loginBtn');
+    const errorMsg       = document.getElementById('errorMsg');
+    const attemptsLeftSp = document.getElementById('attemptsLeft');
+
+    // تركيز مبدئي
+    pinInputs[0].focus();
+
+    pinInputs.forEach((input, idx) => {
+      input.addEventListener('input', () => {
+        if (input.value && idx < pinInputs.length - 1) {
+          pinInputs[idx+1].focus();
+        }
+      });
+      input.addEventListener('keydown', e => {
+        if (e.key==='Backspace' && !input.value && idx>0) {
+          pinInputs[idx-1].focus();
+        }
+      });
+    });
+
+    loginBtn.addEventListener('click', () => {
+      const entered = Array.from(pinInputs).map(i=>i.value).join('');
+      if (entered.length < 4) {
+        showError("الرجاء إدخال 4 أرقام");
+        return;
+      }
+      if (entered === CORRECT_PIN) {
+        localStorage.setItem('isAuthenticated','true');
+        window.location.href = 'products.html';  // تأكد أن هذا الاسم مطابق لصفحتك
+      } else {
+        attemptsLeft--;
+        attemptsLeftSp.textContent = attemptsLeft;
+        if (attemptsLeft <= 0) {
+          showError("تم استنفاد المحاولات. حاول لاحقاً");
+          loginBtn.disabled = true;
+          setTimeout(() => {
+            attemptsLeft = 3;
+            attemptsLeftSp.textContent = attemptsLeft;
+            loginBtn.disabled = false;
+            clearInputs();
+          }, 30000);
+        } else {
+          showError("رمز PIN غير صحيح");
+          shake();
+          clearInputs();
+          pinInputs[0].focus();
+        }
+      }
+    });
+
+    function showError(msg) {
+      errorMsg.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+      errorMsg.style.display = 'block';
+    }
+    function clearInputs() {
+      pinInputs.forEach(i=>i.value='');
+    }
+    function shake() {
+      const c = document.getElementById('pinContainer');
+      c.style.animation = 'shake 0.5s';
+      setTimeout(()=>c.style.animation='',500);
+    }
+  </script>
+</body>
+</html>
