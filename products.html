@@ -49,7 +49,14 @@
       .main, .action-buttons { display:none !important; }
       .notes-row { display:none !important; }
       .notes-row.has-content { display:table-row !important; }
-      input, textarea { display:none !important; }
+      /* إبقاء الحقول النصية مرئية عند الطباعة */
+      .sidebar input,
+      .sidebar textarea {
+        display:block !important;
+        border: none !important;
+        background: transparent !important;
+        font-weight: bold;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
@@ -103,7 +110,6 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbyrqr8wYduPDLZ8TzR1g9uRSzOqMFj5ZtuyGqCR_elQcccVwat_2tbctfoNCIOt4Vqc8g/exec";
   let productsList = [];
 
-  // 1) نجلب البيانات مرّة واحدة
   async function initProducts() {
     try {
       productsList = await fetch(API_URL).then(r => r.json());
@@ -112,7 +118,6 @@
     }
   }
 
-  // 2) نعرض بناءً على productsList
   function displayProducts(category = 'all') {
     const list = category === 'all'
       ? productsList
